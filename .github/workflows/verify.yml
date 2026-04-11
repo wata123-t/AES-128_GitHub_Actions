@@ -1,0 +1,82 @@
+name: AES-128 Verification Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # 手動実行ボタンを有効化
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. GCP 認証
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      # 2. Verilog シミュレータ (Icarus Verilog) のインストール
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+
+      # 3. Python 環境構築
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install cocotb google-cloud-bigquery pycryptodome dbt-bigquery
+
+
+      # --- Terraform 実行---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init & Apply
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
+        run: |
+          cd ./terraform
+          terraform init
+          # 変数を直接渡して、自動で「yes」と答えて実行
+          terraform apply -auto-approve \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="region=asia-northeast1" \
+            -var="dataset_id=aes_verification_dataset"
+
+      # 4. cocotb シミュレーション実行 (BigQueryへのデータ送信)
+      - name: Run cocotb simulation
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
+          PYTHONPATH: ${{ github.workspace }}/python
+        run: |
+          make
+
+      # 5. dbt 実行 & テスト
+      - name: Run dbt models and tests
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
+          DBT_PROFILES_DIR: . # aes_dbt直下のprofiles.ymlを使用
+        run: |
+          cd aes_dbt
+          dbt debug # 接続確認
+          dbt run --full-refresh
+          dbt test
+
+      # 最後にリソースを削除したい場合（任意）
+      - name: Terraform Destroy
+        if: always() # 前のステップが失敗しても必ず実行する設定
+        run: |
+          cd ./terraform
+          terraform destroy -auto-approve \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}"

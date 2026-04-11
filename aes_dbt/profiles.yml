@@ -1,0 +1,12 @@
+# aes_dbt/profiles.yml
+aes_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('GCP_PROJECT_ID') }}" 
+      dataset: aes_verification_dataset
+      threads: 1
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS', '/app/python/credentials/bq-writer.json') }}"
+      location: asia-northeast1

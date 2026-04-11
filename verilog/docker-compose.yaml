@@ -1,0 +1,10 @@
+services:
+  verilog:
+    image: ubuntu:22.04
+    volumes:
+      - .:/work
+    working_dir: /work
+    tty: true
+    stdin_open: true
+    command: /bin/bash
+    # 波形ビューアをローカルで開くため、ツールだけコンテナで、表示はホストで行います
