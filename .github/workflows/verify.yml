@@ -66,6 +66,7 @@ jobs:
       - name: Run dbt models and tests
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           DBT_PROFILES_DIR: . # aes_dbt直下のprofiles.ymlを使用
         run: |
           cd aes_dbt
