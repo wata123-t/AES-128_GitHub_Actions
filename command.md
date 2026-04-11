@@ -57,7 +57,7 @@ git push -u origin main
 -- 次回以降
 --------------------------------------
 git add .
-git commit -m "Modify verilog source file"
+git commit -m "Modify verify.yml"
 git push -u origin main
 
 

@@ -5,7 +5,8 @@ aes_dbt:
     dev:
       type: bigquery
       method: service-account
-      project: "{{ env_var('GCP_PROJECT_ID') }}" 
+      project: "acquired-shape-470706-k0" 
+      #project: "{{ env_var('GCP_PROJECT_ID') }}" 
       dataset: aes_verification_dataset
       threads: 1
       keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS', '/app/python/credentials/bq-writer.json') }}"
