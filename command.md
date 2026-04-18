@@ -60,8 +60,15 @@ git add .
 git commit -m "Modify verify.yml"
 git push -u origin main
 
-
+git commit -m "Modify verify.yml(3rd)"
 --------------------------------------
-
+git clone https://github.com/wata123-t/AES-128_GitHub_Actions
+cd AES-128_GitHub_Actions
+git init
+git add .
+git commit -m "Initial commit: AES-128 Verification Pipeline with cocotb and BigQuery"
+git remote add origin https://github.com/wata123-t/AES-128_GitHub_Actions.git
+git branch -M main
+git push -u origin main
 
 
