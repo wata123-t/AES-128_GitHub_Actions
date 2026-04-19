@@ -57,7 +57,7 @@ git push -u origin main
 -- 次回以降
 --------------------------------------
 git add .
-git commit -m "Modify verify.yml"
+git commit -m "Add Directory(./python/credentials/)"
 git push -u origin main
 
 git commit -m "Modify verify.yml(3rd)"
